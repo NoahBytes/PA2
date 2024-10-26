@@ -3,12 +3,14 @@ from queue import PriorityQueue
 import random
 import math
 
-#Creating global vars
+#Creating/initializing global vars
 clock = -1
 serverIdle = True
 readyQueueCount = -1
 t = -1
 eventQ = PriorityQueue()
+arrival_rate = int(sys.argv[1])
+service_time = float(sys.argv[2])
 
 #Rough equivalent for the struct.
 #Type = 1 if arrival
@@ -32,10 +34,15 @@ def init():
     clock = 0
     serverIdle = True
     readyQueueCount = 0
-    t = 0
+    t = clock + exponential_dist(1/arrival_rate) #Generating first event time t
     eventQ.queue.clear()
     sched_event(1, t)
 
 
-def sched_event():
-    event = Event()
+def sched_event(type: int, time: float):
+    event = Event(type, time)
+    eventQ.put((time, event))
+
+init()
+while eventQ.qsize() != 0:
+    print (eventQ.get()) #FIXME testing
