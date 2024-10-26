@@ -21,10 +21,12 @@ weightedProcsInQueue = -1
 #Essentially equivalent to the struct, but in python.
 #Type = 1 if arrival
 #Type = -1 if departure
+#Arrival time will be used to calculate turnaround times. departure - arrival time = turnaround
 class Event():
-    def __init__(self, type: int, time: float):
+    def __init__(self, type: int, time: float, arrivalTime: float):
         self.type = type
         self.time = time
+        self.arrivalTime = arrivalTime
 
 #uniform_dist and exponential_dist to generate exponential and poisson variables
 def uniform_dist(max_value):
@@ -52,9 +54,9 @@ def init():
 
 #Adds single event to priority queue, based on time and time
 #time dictates priority in queue.
-def sched_event(type: int, time: float):
+def sched_event(type: int, time: float, arrivalTime: float = 0.0):
     global eventQ
-    event = Event(type, time)
+    event = Event(type, time, arrivalTime)
     eventQ.put((time, event))
 
 def arr_handler(e: Event, beginClock: float):
@@ -67,9 +69,9 @@ def arr_handler(e: Event, beginClock: float):
     
     if serverIdle:
         serverIdle = False
-        tempDeparture = exponential_dist(serviceTime)
-        totalTurnaround += tempDeparture
-        sched_event(-1, clock + tempDeparture)
+        service_duration = exponential_dist(serviceTime)
+        busyTime += service_duration
+        sched_event(-1, clock + service_duration, e.time)
     else: 
         readyQueueCount += 1
 
@@ -80,11 +82,17 @@ def dep_handler(e: Event, beginClock: float):
     weightedProcsInQueue += readyQueueCount * (clock - beginClock)
     completedProcesses += 1
 
+    turnaround_time = clock - e.arrivalTime
+    totalTurnaround += turnaround_time
+
     if readyQueueCount == 0:
         serverIdle = True
     else:
         readyQueueCount -= 1
-        sched_event(-1, clock + exponential_dist(serviceTime))
+        service_duration = exponential_dist(serviceTime)
+        busyTime += service_duration
+        # Schedule departure with the arrival time of the next process
+        sched_event(-1, clock + service_duration, e.arrivalTime)
 
 def print_metrics():
     print(f'The number of completed processes was: {completedProcesses}')
