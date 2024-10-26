@@ -7,7 +7,6 @@ import math
 clock = -1
 serverIdle = True
 readyQueueCount = -1
-t = -1
 eventQ = PriorityQueue()
 arrivalRate = int(sys.argv[1])
 serviceTime = float(sys.argv[2])
@@ -30,7 +29,7 @@ class Event():
 #uniform_dist and exponential_dist to generate exponential and poisson variables
 def uniform_dist(max_value):
     rand_int = random.randint(0,max_value)
-    return (rand_int / max_value)    
+    return (rand_int / max_value + 0.0000000001)   
 
 def exponential_dist(t):
     uni_float = uniform_dist(10000000)
@@ -38,6 +37,8 @@ def exponential_dist(t):
 
 #init to initialize the beginning state of the system
 def init():
+    global clock, serverIdle, readyQueueCount, totalTurnaround, eventQ
+    global completedProcesses, weightedProcsInQueue, busyTime
     clock = 0
     serverIdle = True
     readyQueueCount = 0
@@ -46,44 +47,66 @@ def init():
     totalTurnaround = 0
     completedProcesses = 0
     weightedProcsInQueue = 0
+    busyTime = 0
     sched_event(1, t)
 
 #Adds single event to priority queue, based on time and time
 #time dictates priority in queue.
 def sched_event(type: int, time: float):
+    global eventQ
     event = Event(type, time)
     eventQ.put((time, event))
 
-def arr_handler(e: Event, beginClock: float, endClock: float):
+def arr_handler(e: Event, beginClock: float):
+    global clock, serverIdle, readyQueueCount, totalTurnaround, eventQ
+    global completedProcesses, weightedProcsInQueue, busyTime
+
+    weightedProcsInQueue += readyQueueCount * (clock - beginClock)
+
     sched_event(1, clock + exponential_dist(1/arrivalRate))
-    weightedProcsInQueue += readyQueueCount * (endClock - beginClock)
+    
     if serverIdle:
         serverIdle = False
-        sched_event(-1, clock + exponential_dist(serviceTime))
+        tempDeparture = exponential_dist(serviceTime)
+        totalTurnaround += tempDeparture
+        sched_event(-1, clock + tempDeparture)
     else: 
         readyQueueCount += 1
 
-def dep_handler(e: Event, beginClock: float, endClock: float):
-    weightedProcsInQueue += readyQueueCount * (endClock - beginClock)
+def dep_handler(e: Event, beginClock: float):
+    global clock, serverIdle, readyQueueCount, totalTurnaround, eventQ
+    global completedProcesses, weightedProcsInQueue, busyTime
+
+    weightedProcsInQueue += readyQueueCount * (clock - beginClock)
+    completedProcesses += 1
+
     if readyQueueCount == 0:
-        serverIdle == True
+        serverIdle = True
     else:
         readyQueueCount -= 1
         sched_event(-1, clock + exponential_dist(serviceTime))
 
+def print_metrics():
+    print(f'The number of completed processes was: {completedProcesses}')
+    print(f'The average turnaround time was: {totalTurnaround/completedProcesses}')
+    print(f'The total throughput was: {completedProcesses/clock}')
+    print(f'The number of completed processes was: {completedProcesses}')
 
 #run() handles the loops and logic of the simulation
 def run():
+    global clock, serverIdle, readyQueueCount, totalTurnaround, eventQ
+    global completedProcesses, weightedProcsInQueue, busyTime
     init()
     while (completedProcesses != 10000):
         e = eventQ.get()[1]
         old_clock = clock
-        clock = e.time #update clock to time event begins
+        clock = e.time #update clock to the time the event begins
         match e.type:
             case 1:
-                arr_handler(e, old_clock, clock)
+                arr_handler(e, old_clock)
             case -1:
-                dep_handler(e, old_clock, clock)
+                dep_handler(e, old_clock)
 
-while eventQ.qsize() != 0:
-    print (eventQ.get()[1].time) #FIXME testing
+    print_metrics()
+
+run()
