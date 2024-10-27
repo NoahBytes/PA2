@@ -99,7 +99,9 @@ def print_metrics():
     print(f' and a service time of {serviceTime}, here are the results: ')
     print(f'The number of completed processes was: {completedProcesses}')
     print(f'The average turnaround time was: {totalTurnaround/completedProcesses}')
-    print(f'The total throughput was: {completedProcesses/clock} \n')
+    print(f'The total throughput was: {completedProcesses/clock}')
+    print(f'The average CPU utilization was: {busyTime/clock}')
+    print(f'The average processes in the Ready Queue was: {weightedProcsInQueue/clock}\n')
 
 #run() handles the loops and logic of the simulation
 def run():
@@ -110,11 +112,12 @@ def run():
         e = eventQ.get()[1]
         old_clock = clock
         clock = e.time #update clock to the time the event begins
-        match e.type:
-            case 1:
-                arr_handler(e, old_clock)
-            case -1:
-                dep_handler(e, old_clock)
+        if e.type == 1:
+            arr_handler(e, old_clock)
+            continue
+        elif e.type == -1:
+            dep_handler(e, old_clock)
+            continue
 
     print_metrics()
 
