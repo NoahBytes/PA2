@@ -95,10 +95,11 @@ def dep_handler(e: Event, beginClock: float):
         sched_event(-1, clock + service_duration, e.arrivalTime)
 
 def print_metrics():
+    print(f'For an arrival rate of {arrivalRate} processes per second', end = '')
+    print(f' and a service time of {serviceTime}, here are the results: ')
     print(f'The number of completed processes was: {completedProcesses}')
     print(f'The average turnaround time was: {totalTurnaround/completedProcesses}')
-    print(f'The total throughput was: {completedProcesses/clock}')
-    print(f'The number of completed processes was: {completedProcesses}')
+    print(f'The total throughput was: {completedProcesses/clock} \n')
 
 #run() handles the loops and logic of the simulation
 def run():
