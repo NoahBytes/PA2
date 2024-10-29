@@ -16,27 +16,27 @@ fig.suptitle("Performance Metrics vs. Arrival Rate (lambda)", fontsize=16)
 # Plot for average turnaround time
 axes[0, 0].plot(data["arrival_rate"], data["turnaround_time"], marker='o', color='b')
 axes[0, 0].set_title("Average Turnaround Time")
-axes[0, 0].set_xlabel("Arrival Rate (𝜆)")
+axes[0, 0].set_xlabel("Arrival Rate (lambda)")
 axes[0, 0].set_ylabel("Turnaround Time")
 
 # Plot for total throughput
 axes[0, 1].plot(data["arrival_rate"], data["throughput"], marker='o', color='g')
 axes[0, 1].set_title("Total Throughput")
-axes[0, 1].set_xlabel("Arrival Rate (𝜆)")
+axes[0, 1].set_xlabel("Arrival Rate (lambda)")
 axes[0, 1].set_ylabel("Throughput")
 
 # Plot for average CPU utilization
 axes[1, 0].plot(data["arrival_rate"], data["cpu_utilization"], marker='o', color='r')
 axes[1, 0].set_title("Average CPU Utilization")
-axes[1, 0].set_xlabel("Arrival Rate (𝜆)")
+axes[1, 0].set_xlabel("Arrival Rate (lambda)")
 axes[1, 0].set_ylabel("CPU Utilization")
 
 # Plot for average processes in the ready queue
 axes[1, 1].plot(data["arrival_rate"], data["ready_queue_processes"], marker='o', color='purple')
 axes[1, 1].set_title("Average Processes in the Ready Queue")
-axes[1, 1].set_xlabel("Arrival Rate (𝜆)")
+axes[1, 1].set_xlabel("Arrival Rate (lambda)")
 axes[1, 1].set_ylabel("Ready Queue Processes")
 
 # Display the plots
-plt.tight_layout(rect=[0, 0, 1, 0.95])
+plt.tight_layout( rect=[0, 0, 1, 0.95],h_pad=4, w_pad=3)
 plt.show()
